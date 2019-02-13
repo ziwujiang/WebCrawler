@@ -12,6 +12,7 @@ import requests
 from contextlib import closing
 import re
 import urllib
+import time
 
 class ProgressBar(object):
     def __init__(self, title, count=0.0, run_status=None, fin_status=None, total=100.0, unit='', sep='/', chunk_size=1.0):
@@ -65,11 +66,14 @@ if __name__ == '__main__':
     for count in range(78, 83):
         index = str(count)
         url = "http://www.proedu.com.cn/web/shareVideo/index.action?id=10403"+index+"&ajax=1"
-        htm = urllib.request.urlopen(url, headers=headers).read().decode()
+        req = urllib.request.Request(url, headers=headers)
+        htm = urllib.request.urlopen(req).read().decode()
         urllist = re.findall(r'http://vod0vwkapu4.vod.126.net/.+_shd\.mp4', htm)
         namelist = re.findall('(?<=<div id="title" class="title">).+?(?=</div>)', htm)
         url_mp4 = urllist[0]
         filename = namelist[0]
         path = r'F:/load/'
         downloadVideo(url_mp4, filename, path)
+        time.sleep(10)
+
 
