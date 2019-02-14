@@ -15,6 +15,7 @@ import urllib
 import time
 
 class ProgressBar(object):
+    # 再cmd或者终端中显示下载进度
     def __init__(self, title, count=0.0, run_status=None, fin_status=None, total=100.0, unit='', sep='/', chunk_size=1.0):
         super(ProgressBar, self).__init__()
         self.info = "[%s] %s %.2f %s %s %.2f %s"
@@ -46,11 +47,11 @@ class ProgressBar(object):
 
 
 def downloadVideo(url, file_name='', savepath='E:/' ):
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.81 Safari/537.36"}
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.81 Safari/537.36"} #添加用户代理信息
     with closing(requests.get(url, stream=True, headers=headers)) as response:
         chunk_size = 1024
         content_size = int(response.headers['content-length'])
-        file_D = savepath + file_name + '.mp4'
+        file_D = savepath + '/' + file_name + '.mp4'
         if os.path.exists(file_D) and os.path.getsize(file_D) == content_size:
             print('跳过'+file_name)
         else:
@@ -63,16 +64,24 @@ def downloadVideo(url, file_name='', savepath='E:/' ):
 
 if __name__ == '__main__':
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.81 Safari/537.36"}
-    for count in range(78, 83):
+    dowloadListNum = list(range(60, 82))
+    dowloadListNum.extend([57, 84])  # 一共24集，补充缺少的两集，这种情况需要爬取完数据以后，进行数据检查
+
+    path = r'F:/load'  #设置下载路径，如果使用笔记本没有F盘，可以改成C盘或D盘
+    if os.path.exists(path):
+        pass
+    else:
+        os.makedirs(path)
+
+    for count in dowloadListNum:
         index = str(count)
-        url = "http://www.proedu.com.cn/web/shareVideo/index.action?id=10403"+index+"&ajax=1"
+        url = "http://www.proedu.com.cn/web/shareVideo/index.action?id=10403"+index+"&ajax=1"   #视频所载入的页面
         req = urllib.request.Request(url, headers=headers)
         htm = urllib.request.urlopen(req).read().decode()
-        urllist = re.findall(r'http://vod0vwkapu4.vod.126.net/.+_shd\.mp4', htm)
-        namelist = re.findall('(?<=<div id="title" class="title">).+?(?=</div>)', htm)
-        url_mp4 = urllist[0]
+        urllist = re.findall(r'http://vod0vwkapu4.vod.126.net/.+_shd\.mp4', htm)       #提取视频地址
+        namelist = re.findall('(?<=<div id="title" class="title">).+?(?=</div>)', htm)  #提取视频名称
+        url_mp4 = urllist[0]      #多次出现的话，取出第一个
         filename = namelist[0]
-        path = r'F:/load/'
         downloadVideo(url_mp4, filename, path)
         time.sleep(10)
 
